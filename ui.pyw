@@ -72,33 +72,36 @@ class UI(tk.Frame):
                     fingerpartsOptions.append(ROI)
                     fingerpartsOptionsBounds.append(c)
                     ROI_number += 1
-        i=0
         #print (len(fingerpartsOptions))
-        found = None
-        resized = imutils.resize(fingerprintImg, width = int(fingerprintImg.shape[1] * 0.75))
-        for option in fingerpartsOptions:
-            optName= "option" + str(i)
-            option = cv2.Canny(option, 50, 200)
-            (tH, tW) = option.shape[:2]
-            # resize the image according to the scale, and keep track
-            # of the ratio of the resizing
-            r = fingerprintImg.shape[1] / float(resized.shape[1])
-            # detect edges in the resized, grayscale image and apply template
-            # matching to find the template in the image
-            edged = cv2.Canny(resized, 50, 200)
-            result = cv2.matchTemplate(edged, option, cv2.TM_CCOEFF)
-            (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
-            #compute the (x, y) coordinates
-            # of the bounding box based on the resized ratio
-            (startX, startY) = (int(maxLoc[0] * r), int(maxLoc[1] * r))
-            (endX, endY) = (int((maxLoc[0] + tW) * r), int((maxLoc[1] + tH) * r))
-            # draw a bounding box around the detected result and display the image
-            if(maxVal>20000000):
-                cv2.rectangle(fingerprintImg, (startX, startY), (endX, endY), (0, 0, 255), 2)
-                #draw correct solutions
-                x,y,w,h = cv2.boundingRect(fingerpartsOptionsBounds[i])
-                cv2.rectangle(copy,(x,y),(x+w,y+h),(36,255,12),2)
-            i+=1
+        scalingVals = [0.75, 0.8]
+        for scale in scalingVals:
+            i=0
+            resized = imutils.resize(fingerprintImg, width = int(fingerprintImg.shape[1] * scale))
+            for option in fingerpartsOptions:
+                optName= "option" + str(i)
+                option = cv2.Canny(option, 50, 200)
+                (tH, tW) = option.shape[:2]
+                # resize the image according to the scale, and keep track
+                # of the ratio of the resizing
+                r = fingerprintImg.shape[1] / float(resized.shape[1])
+                # detect edges in the resized, grayscale image and apply template
+                # matching to find the template in the image
+                edged = cv2.Canny(resized, 50, 200)
+                result = cv2.matchTemplate(edged, option, cv2.TM_CCOEFF)
+                (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
+
+                #compute the (x, y) coordinates
+                # of the bounding box based on the resized ratio
+                (startX, startY) = (int(maxLoc[0] * r), int(maxLoc[1] * r))
+                (endX, endY) = (int((maxLoc[0] + tW) * r), int((maxLoc[1] + tH) * r))
+                # draw a bounding box around the detected result and display the image
+                if(maxVal>30000000): #TODO select 4 highest instead of above val
+                    #print(maxVal)
+                    cv2.rectangle(fingerprintImg, (startX, startY), (endX, endY), (0, 0, 255), 2)
+                    #draw correct solutions
+                    x,y,w,h = cv2.boundingRect(fingerpartsOptionsBounds[i])
+                    cv2.rectangle(copy,(x,y),(x+w,y+h),(36,255,12),2)
+                i+=1
 
             
         #display result
