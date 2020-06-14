@@ -2,7 +2,11 @@
 Solves the fingerprint "hack" for you within GTA V. Take the latest .jpg image from the folder in the input for treatment.
 
 ## Install
-You need python with all libs used in the script
+You need python 3 with all libs used in the script
+Or just use the .exe release
 
 ## Running
-double click the script
+double click the script/executable, enter the folder from which the image must be taken from (will automatically select image with latest creation time ), click the button.
+Made with using steam screenshot in mind.
+
+Feel free to modify for your own use.
