@@ -95,7 +95,7 @@ class UI(tk.Frame):
                 (startX, startY) = (int(maxLoc[0] * r), int(maxLoc[1] * r))
                 (endX, endY) = (int((maxLoc[0] + tW) * r), int((maxLoc[1] + tH) * r))
                 # draw a bounding box around the detected result and display the image
-                if(maxVal>30000000): #TODO select 4 highest instead of above val
+                if(maxVal>31000000): #TODO select 4 highest instead of above val
                     #print(maxVal)
                     cv2.rectangle(fingerprintImg, (startX, startY), (endX, endY), (0, 0, 255), 2)
                     #draw correct solutions
