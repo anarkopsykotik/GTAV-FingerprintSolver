@@ -41,6 +41,7 @@ class UI(tk.Frame):
     def analyse(self):
         latestScreen = self.getGTAScreen()
         image = cv2.imread(latestScreen)
+        #image = cv2.imread('test6.jpg')
         copy = image.copy()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray,40,255,cv2.THRESH_BINARY)[1]
@@ -54,6 +55,7 @@ class UI(tk.Frame):
         #for each contour found, check size/coord
         #to get the fingerprint and options. Also get the corresponding rectangles to draw
         foundSolutionsCoord = []
+        rightAnswers=[]
         for c in cnts:
             x,y,w,h = cv2.boundingRect(c)
             ROI = image[y:y+h, x:x+w]
@@ -97,12 +99,31 @@ class UI(tk.Frame):
                 # draw a bounding box around the detected result and display the image
                 if(maxVal>31000000): #TODO select 4 highest instead of above val
                     #print(maxVal)
-                    cv2.rectangle(fingerprintImg, (startX, startY), (endX, endY), (0, 0, 255), 2)
+                    #cv2.rectangle(fingerprintImg, (startX, startY), (endX, endY), (0, 0, 255), 2)
                     #draw correct solutions
                     x,y,w,h = cv2.boundingRect(fingerpartsOptionsBounds[i])
-                    cv2.rectangle(copy,(x,y),(x+w,y+h),(36,255,12),2)
+                    answer = maxVal,x,y,w,h
+                    rightAnswers.append(answer)
+                    #cv2.rectangle(copy,(x,y),(x+w,y+h),(36,255,12),2)
                 i+=1
 
+        
+        if(len(rightAnswers) <= 4):
+            for answer in rightAnswers:
+                maxVal,x,y,w,h=answer
+                cv2.rectangle(copy,(x,y),(x+w,y+h),(36,255,12),2)
+        else:
+            highestVal=0
+            vals=[]
+            for answer in rightAnswers:
+                maxVal,x,y,w,h=answer
+                vals.append(maxVal)
+            while(len(vals) > 4):
+                vals.remove(min(vals))
+            for answer in rightAnswers:
+                maxVal,x,y,w,h=answer
+                if(maxVal in vals):
+                    cv2.rectangle(copy,(x,y),(x+w,y+h),(36,255,12),2)
             
         #display result
 
