@@ -10,7 +10,7 @@ import mss
 import sys
 import os 
 from matplotlib import pyplot as plt
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageGrab
 import glob
 
 class UI(tk.Frame):
@@ -20,27 +20,30 @@ class UI(tk.Frame):
         # create a prompt, an input box, an output label,
         # and a button to do the computation
         self.prompt = tk.Label(self, text="Grab image from GTA and launch analysis", anchor="w")
-        self.entry = tk.Entry(self)
+        #self.entry = tk.Entry(self)
         self.imgResult = tk.Label(self)
         self.submit = tk.Button(self, text="SOLVE", command = self.analyse)
         #self.submit = tk.Button(self, text="GET SCREEN", command = self.getGTAScreen)
 
         # lay the widgets out on the screen. 
         self.prompt.pack(side="top", fill="x")
-        self.entry.pack(side="top", fill="x", padx=20)
+        #self.entry.pack(side="top", fill="x", padx=20)
         self.submit.pack(side="bottom")
         self.imgResult.pack(side="bottom")
         
 
     def getGTAScreen(self):
-        list_of_files = glob.glob(self.entry.get() + "\*.jpg" ) # * means all if need specific format then *.csv
-        latest_file = max(list_of_files, key=os.path.getctime)
+        #list_of_files = glob.glob(self.entry.get() + "\*.jpg" ) # * means all if need specific format then *.csv
+        im = ImageGrab.grabclipboard()
+        #latest_file = max(list_of_files, key=os.path.getctime)
         #print(latest_file)
-        return latest_file       
+        return im       
 
     def analyse(self):
         latestScreen = self.getGTAScreen()
-        image = cv2.imread(latestScreen)
+        #image = cv2.imread(latestScreen)
+        image = cv2.cvtColor(np.array(latestScreen), cv2.COLOR_BGR2RGB)
+        #image = cv2.cv2.fromarray(latestScreen)
         #image = cv2.imread('test6.jpg')
         copy = image.copy()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -66,8 +69,13 @@ class UI(tk.Frame):
                 fingerprintImg = ROI
             if (w > 110 and x < 860 and abs(w-h)<5): #those are the options
                 coord = x,y
+                coord2=x-1,y-1
+                #print(coord)
+                #print(coord[0])
+                #todo ignore too close coords
                 if(coord not in foundSolutionsCoord):
                     foundSolutionsCoord.append(coord)
+                    foundSolutionsCoord.append(coord2)
                     cv2.rectangle(copy,(x,y),(x+w,y+h),(255,1,1),2)
                     #print("potential solution", w,"-",h,"-","-",x,"-",y)
                     cv2.rectangle(copy,(x,y),(x+w,y+h),(255,1,12),2)
@@ -98,7 +106,7 @@ class UI(tk.Frame):
                 (endX, endY) = (int((maxLoc[0] + tW) * r), int((maxLoc[1] + tH) * r))
                 # draw a bounding box around the detected result and display the image
                 if(maxVal>31000000): #TODO select 4 highest instead of above val
-                    #print(maxVal)
+                    print(maxVal)
                     #cv2.rectangle(fingerprintImg, (startX, startY), (endX, endY), (0, 0, 255), 2)
                     #draw correct solutions
                     x,y,w,h = cv2.boundingRect(fingerpartsOptionsBounds[i])
@@ -107,7 +115,6 @@ class UI(tk.Frame):
                     #cv2.rectangle(copy,(x,y),(x+w,y+h),(36,255,12),2)
                 i+=1
 
-        
         if(len(rightAnswers) <= 4):
             for answer in rightAnswers:
                 maxVal,x,y,w,h=answer
