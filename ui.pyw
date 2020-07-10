@@ -44,7 +44,7 @@ class UI(tk.Frame):
         #image = cv2.imread(latestScreen)
         image = cv2.cvtColor(np.array(latestScreen), cv2.COLOR_BGR2RGB)
         #image = cv2.cv2.fromarray(latestScreen)
-        #image = cv2.imread('test6.jpg')
+        #image = cv2.imread('test3.jpg')
         copy = image.copy()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray,40,255,cv2.THRESH_BINARY)[1]
@@ -58,6 +58,7 @@ class UI(tk.Frame):
         #for each contour found, check size/coord
         #to get the fingerprint and options. Also get the corresponding rectangles to draw
         foundSolutionsCoord = []
+        closeSolutionsCoord = []
         rightAnswers=[]
         for c in cnts:
             x,y,w,h = cv2.boundingRect(c)
@@ -69,13 +70,19 @@ class UI(tk.Frame):
                 fingerprintImg = ROI
             if (w > 110 and x < 860 and abs(w-h)<5): #those are the options
                 coord = x,y
-                coord2=x-1,y-1
                 #print(coord)
-                #print(coord[0])
-                #todo ignore too close coords
-                if(coord not in foundSolutionsCoord):
+
+                if(coord not in foundSolutionsCoord and coord not in closeSolutionsCoord):
+                    #print("appended")
                     foundSolutionsCoord.append(coord)
-                    foundSolutionsCoord.append(coord2)
+                    closeSolutionsCoord.append((x-1,y)) #ugly, find cleaner way
+                    closeSolutionsCoord.append((x-1,y-1))
+                    closeSolutionsCoord.append((x,y-1))
+                    closeSolutionsCoord.append((x+1,y))
+                    closeSolutionsCoord.append((x+1,y+1))
+                    closeSolutionsCoord.append((x,y+1))
+                    #print(closeSolutionsCoord)
+                    #foundSolutionsCoord.append(coord2) #todo fixme add it better
                     cv2.rectangle(copy,(x,y),(x+w,y+h),(255,1,1),2)
                     #print("potential solution", w,"-",h,"-","-",x,"-",y)
                     cv2.rectangle(copy,(x,y),(x+w,y+h),(255,1,12),2)
