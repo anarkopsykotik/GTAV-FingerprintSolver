@@ -39,12 +39,21 @@ class UI(tk.Frame):
         #print(latest_file)
         return im       
 
+    def appendCloseCoord(self, closeSolutionsCoord, coord):
+        x,y = coord
+        for i in range(15):
+            for j in range(15):
+                closeSolutionsCoord.append((x-i,y-j))
+                closeSolutionsCoord.append((x+i,y-j))
+                closeSolutionsCoord.append((x+i,y+j))
+                closeSolutionsCoord.append((x-i,y+j))
+
     def analyse(self):
         latestScreen = self.getGTAScreen()
         #image = cv2.imread(latestScreen)
         image = cv2.cvtColor(np.array(latestScreen), cv2.COLOR_BGR2RGB)
         #image = cv2.cv2.fromarray(latestScreen)
-        #image = cv2.imread('test3.jpg')
+        #image = cv2.imread('test5.jpg')
         copy = image.copy()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray,40,255,cv2.THRESH_BINARY)[1]
@@ -71,21 +80,18 @@ class UI(tk.Frame):
             if (w > 110 and x < 860 and abs(w-h)<5): #those are the options
                 coord = x,y
                 #print(coord)
-
+                
                 if(coord not in foundSolutionsCoord and coord not in closeSolutionsCoord):
                     #print("appended")
+                    #print(coord)
+                    #print("w,h",w,h)
                     foundSolutionsCoord.append(coord)
-                    closeSolutionsCoord.append((x-1,y)) #ugly, find cleaner way
-                    closeSolutionsCoord.append((x-1,y-1))
-                    closeSolutionsCoord.append((x,y-1))
-                    closeSolutionsCoord.append((x+1,y))
-                    closeSolutionsCoord.append((x+1,y+1))
-                    closeSolutionsCoord.append((x,y+1))
+                    self.appendCloseCoord(closeSolutionsCoord, coord)#remove  close solutions to avoid duplicate
+                    
                     #print(closeSolutionsCoord)
-                    #foundSolutionsCoord.append(coord2) #todo fixme add it better
                     cv2.rectangle(copy,(x,y),(x+w,y+h),(255,1,1),2)
                     #print("potential solution", w,"-",h,"-","-",x,"-",y)
-                    cv2.rectangle(copy,(x,y),(x+w,y+h),(255,1,12),2)
+                    #cv2.rectangle(copy,(x,y),(x+w,y+h),(255,1,12),2)
                     fingerpartsOptions.append(ROI)
                     fingerpartsOptionsBounds.append(c)
                     ROI_number += 1
